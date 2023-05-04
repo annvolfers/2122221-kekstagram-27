@@ -9,9 +9,7 @@ function getRandomPositiveInteger(min, max) {
   return Math.floor(Math.random() * (greater - lower + 1)) + lower;
 }
 
-function checkStringLength(string, maxLength) {
-  return string.length <= maxLength;
-}
+const checkStringLength = (string, maxLength) => string.length <= maxLength;
 
 const getRandomArrayElement = (elements) => elements[getRandomPositiveInteger(0, elements.length - 1)];
 

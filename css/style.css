@@ -710,6 +710,11 @@ main {
   border-radius: 5px;
 }
 
+.img-upload__field-text-error {
+  margin-bottom: 20px;
+  color: #f48181;
+  text-transform: none;
+}
 
 /**
  * Кнопка для отправки изображения
