@@ -7,6 +7,7 @@ const closeButton = uploadForm.querySelector('#upload-cancel');
 const hashtagsInput = uploadForm.querySelector('[name="hashtags"]');
 const descriptionInput = uploadForm.querySelector('[name="description"]');
 
+const MAX_HASHTAGS_COUNT = 5;
 const hashtagErrorTypes = {
   'count': 'Максимальное количество хэш-тегов - 5',
   'duplicates': 'Один и тот же хэш-тег не может быть использован дважды',
@@ -75,7 +76,7 @@ function validateHashtags(value) {
   const hashtagReg = /^#[a-zа-яё0-9]{1,19}$/i;
   const hashtags = value.trim().toLowerCase().split(' ');
 
-  if (hashtags.length > 5) {
+  if (hashtags.length > MAX_HASHTAGS_COUNT) {
     hashtagErrorText = hashtagErrorTypes['count'];
     return false;
   }
