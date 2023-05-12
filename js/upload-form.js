@@ -1,4 +1,6 @@
 import { isEscapeKey } from './utils.js';
+import { initScale, resetScale } from './scale.js';
+import { resetEffects } from './effects.js';
 
 const uploadForm = document.querySelector('#upload-select-image');
 const uploadFileInput = uploadForm.querySelector('#upload-file');
@@ -13,6 +15,7 @@ const hashtagErrorTypes = {
   'duplicates': 'Один и тот же хэш-тег не может быть использован дважды',
   'reg': 'Хэш-тег должен начинаться с символа #, может состоять из букв и чисел и не может содержать пробелы, спецсимволы, символы пунктуации, эмодзи и т. д. Максимальная длина одного хэш-тега 20 символов, включая решётку'
 };
+
 let hashtagErrorText;
 
 const pristine = new Pristine(uploadForm, {
@@ -21,33 +24,19 @@ const pristine = new Pristine(uploadForm, {
   errorTextClass: 'img-upload__field-text-error',
 });
 
-function setUploadFormListeners() {
+function initUploadForm() {
   uploadFileInput.addEventListener('change', () => {
     uploadFilePreview.classList.remove('hidden');
     document.body.classList.add('modal-open');
 
+    initScale();
     closeButton.addEventListener('click', closeUploadFilePreview);
+    descriptionInput.addEventListener('focus', descriptionInputFocusHandler);
+    hashtagsInput.addEventListener('focus', hashtagsInputFocusHandler);
+    uploadForm.addEventListener('submit', uploadFormSubmitHandler);
     document.addEventListener('keydown', escKeydownHandler);
   });
 
-  uploadForm.addEventListener('submit', (evt) => {
-    evt.preventDefault();
-
-    // const isValid = pristine.validate();
-  });
-
-  descriptionInput.addEventListener('focus', () => {
-    document.removeEventListener('keydown', escKeydownHandler);
-    descriptionInput.addEventListener('focusout', () => document.addEventListener('keydown', escKeydownHandler));
-  });
-
-  hashtagsInput.addEventListener('focus', () => {
-    document.removeEventListener('keydown', escKeydownHandler);
-    hashtagsInput.addEventListener('focusout', () => document.addEventListener('keydown', escKeydownHandler));
-  });
-}
-
-function setUploadFormValidators() {
   pristine.addValidator(hashtagsInput, validateHashtags, getHashtagsErrorMessage);
 }
 
@@ -56,8 +45,13 @@ function closeUploadFilePreview() {
   document.body.classList.remove('modal-open');
   uploadForm.reset();
   pristine.reset();
+  resetScale();
+  resetEffects();
 
   closeButton.removeEventListener('click', closeUploadFilePreview);
+  descriptionInput.removeEventListener('focus', descriptionInputFocusHandler);
+  hashtagsInput.removeEventListener('focus', hashtagsInputFocusHandler);
+  uploadForm.removeEventListener('submit', uploadFormSubmitHandler);
   document.removeEventListener('keydown', escKeydownHandler);
 }
 
@@ -66,6 +60,22 @@ function escKeydownHandler(evt) {
     evt.preventDefault();
     closeUploadFilePreview();
   }
+}
+
+function descriptionInputFocusHandler() {
+  document.removeEventListener('keydown', escKeydownHandler);
+  descriptionInput.addEventListener('focusout', () => document.addEventListener('keydown', escKeydownHandler));
+}
+
+function hashtagsInputFocusHandler() {
+  document.removeEventListener('keydown', escKeydownHandler);
+  hashtagsInput.addEventListener('focusout', () => document.addEventListener('keydown', escKeydownHandler));
+}
+
+function uploadFormSubmitHandler(evt) {
+  evt.preventDefault();
+
+  // const isValid = pristine.validate();
 }
 
 function validateHashtags(value) {
@@ -104,4 +114,4 @@ function getHashtagsErrorMessage() {
   return hashtagErrorText;
 }
 
-export { setUploadFormListeners as setFormListeners, setUploadFormValidators as setFormValidators };
+export { initUploadForm };
