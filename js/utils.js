@@ -21,6 +21,30 @@ function createIdGenerator() {
   };
 }
 
+function createRandomIdFromRangeGenerator (min, max) {
+  const previousValues = [];
+
+  return function () {
+    let currentValue = getRandomPositiveInteger(min, max);
+    if (previousValues.length >= (max - min + 1)) {
+      return null;
+    }
+    while (previousValues.includes(currentValue)) {
+      currentValue = getRandomPositiveInteger(min, max);
+    }
+    previousValues.push(currentValue);
+    return currentValue;
+  };
+}
+
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-export { getRandomPositiveInteger, checkStringLength, getRandomArrayElement, createIdGenerator, isEscapeKey };
+function debounce (callback, timeoutDelay) {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+}
+
+export { getRandomPositiveInteger, checkStringLength, getRandomArrayElement, createIdGenerator, createRandomIdFromRangeGenerator, isEscapeKey, debounce };

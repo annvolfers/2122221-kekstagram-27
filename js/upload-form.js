@@ -7,11 +7,13 @@ import { showMessage } from './message.js';
 const uploadForm = document.querySelector('#upload-select-image');
 const uploadFileInput = uploadForm.querySelector('#upload-file');
 const uploadFilePreview = uploadForm.querySelector('.img-upload__overlay');
+const uploadImagePreview = uploadForm.querySelector('.img-upload__preview img');
 const closeButton = uploadForm.querySelector('#upload-cancel');
 const hashtagsInput = uploadForm.querySelector('[name="hashtags"]');
 const descriptionInput = uploadForm.querySelector('[name="description"]');
 const submitButton = uploadForm.querySelector('.img-upload__submit');
 
+const FILE_TYPES = ['jpg', 'jpeg', 'png'];
 const MAX_HASHTAGS_COUNT = 5;
 const hashtagErrorTypes = {
   'count': 'Максимальное количество хэш-тегов - 5',
@@ -38,6 +40,15 @@ function initUploadForm() {
     hashtagsInput.addEventListener('focus', hashtagsInputFocusHandler);
     uploadForm.addEventListener('submit', uploadFormSubmitHandler);
     document.addEventListener('keydown', uploadFormEscKeydownHandler);
+
+    const file = uploadFileInput.files[0];
+    const fileName = file.name.toLowerCase();
+
+    const matches = FILE_TYPES.some((it) => fileName.endsWith(it));
+
+    if (matches) {
+      uploadImagePreview.src = URL.createObjectURL(file);
+    }
   });
 
   pristine.addValidator(hashtagsInput, validateHashtags, getHashtagsErrorMessage);
