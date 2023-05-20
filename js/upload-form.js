@@ -1,6 +1,8 @@
 import { isEscapeKey } from './utils.js';
 import { initScale, resetScale } from './scale.js';
 import { resetEffects } from './effects.js';
+import { sendData } from './api.js';
+import { showMessage } from './message.js';
 
 const uploadForm = document.querySelector('#upload-select-image');
 const uploadFileInput = uploadForm.querySelector('#upload-file');
@@ -8,6 +10,7 @@ const uploadFilePreview = uploadForm.querySelector('.img-upload__overlay');
 const closeButton = uploadForm.querySelector('#upload-cancel');
 const hashtagsInput = uploadForm.querySelector('[name="hashtags"]');
 const descriptionInput = uploadForm.querySelector('[name="description"]');
+const submitButton = uploadForm.querySelector('.img-upload__submit');
 
 const MAX_HASHTAGS_COUNT = 5;
 const hashtagErrorTypes = {
@@ -34,7 +37,7 @@ function initUploadForm() {
     descriptionInput.addEventListener('focus', descriptionInputFocusHandler);
     hashtagsInput.addEventListener('focus', hashtagsInputFocusHandler);
     uploadForm.addEventListener('submit', uploadFormSubmitHandler);
-    document.addEventListener('keydown', escKeydownHandler);
+    document.addEventListener('keydown', uploadFormEscKeydownHandler);
   });
 
   pristine.addValidator(hashtagsInput, validateHashtags, getHashtagsErrorMessage);
@@ -52,30 +55,45 @@ function closeUploadFilePreview() {
   descriptionInput.removeEventListener('focus', descriptionInputFocusHandler);
   hashtagsInput.removeEventListener('focus', hashtagsInputFocusHandler);
   uploadForm.removeEventListener('submit', uploadFormSubmitHandler);
-  document.removeEventListener('keydown', escKeydownHandler);
+  document.removeEventListener('keydown', uploadFormEscKeydownHandler);
 }
 
-function escKeydownHandler(evt) {
-  if (isEscapeKey(evt)) {
+function uploadFormEscKeydownHandler(evt) {
+  if (isEscapeKey(evt) && !evt.target.querySelector('.error')) {
     evt.preventDefault();
     closeUploadFilePreview();
   }
 }
 
 function descriptionInputFocusHandler() {
-  document.removeEventListener('keydown', escKeydownHandler);
-  descriptionInput.addEventListener('focusout', () => document.addEventListener('keydown', escKeydownHandler));
+  document.removeEventListener('keydown', uploadFormEscKeydownHandler);
+  descriptionInput.addEventListener('focusout', () => document.addEventListener('keydown', uploadFormEscKeydownHandler));
 }
 
 function hashtagsInputFocusHandler() {
-  document.removeEventListener('keydown', escKeydownHandler);
-  hashtagsInput.addEventListener('focusout', () => document.addEventListener('keydown', escKeydownHandler));
+  document.removeEventListener('keydown', uploadFormEscKeydownHandler);
+  hashtagsInput.addEventListener('focusout', () => document.addEventListener('keydown', uploadFormEscKeydownHandler));
 }
 
 function uploadFormSubmitHandler(evt) {
   evt.preventDefault();
 
-  // const isValid = pristine.validate();
+  const isValid = pristine.validate();
+  if (isValid) {
+    submitButton.disabled = true;
+    sendData(
+      () => {
+        showMessage('success');
+        submitButton.disabled = false;
+        closeUploadFilePreview();
+      },
+      () => {
+        showMessage('error');
+        submitButton.disabled = false;
+      },
+      new FormData(evt.target)
+    );
+  }
 }
 
 function validateHashtags(value) {
